@@ -4,6 +4,7 @@ import java.sql.*;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -42,7 +43,40 @@ public class addUser extends HttpServlet {
 	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
 		// TODO Auto-generated method stub
 		
+	     	
+		  String name,surname,email;
+		  name = request.getParameter("name");
+		  surname = request.getParameter("surname");
+		  email = request.getParameter("email");
+		  
+	      response.setContentType("text/html");
 	      
+	      // Actual logic goes here.
+	      PrintWriter out = response.getWriter();
+		  
+		  if(email != null)
+		  {
+			  if(validate(email))
+			  {
+			      
+			      out.println("<h1>" + email + "</h1>");
+			      
+			      //databaseInsertFunction(email,surname,name);
+			      
+			      request.setAttribute("email", email);
+			      request.getRequestDispatcher("addUser.jsp").forward(request, response); 
+			  }
+			  else
+			  {
+				  out.println("<h1> Email invalid </h1>"); 
+			  }
+			  
+		  }
+		  
+	}
+	
+	protected void databaseInsertFunction(String email, String surname, String name)
+	{
 	      Connection conn = null;
 		  Statement stmt = null;
 		  
@@ -52,67 +86,44 @@ public class addUser extends HttpServlet {
 	      //  Database credentials
 	      String USER = "root";
 	      String PASS = "password";
+		try {
+			// Register JDBC driver
+			Class.forName("com.mysql.jdbc.Driver");
 
-		
-		  String name,surname,email;
-		  name = request.getParameter("name");
-		  surname = request.getParameter("surname");
-		  email = request.getParameter("email");
-		  
-		  if(validate(email))
-		  {
-		      PrintWriter out = response.getWriter();
-		      out.println("<h1>" + email + "</h1>");
-		      
-			  	try{
-			          // Register JDBC driver
-			          Class.forName("com.mysql.jdbc.Driver");
-	
-			          // Open a connection
-			          conn = DriverManager.getConnection(DB_URL,USER,PASS);
-	
-			          // Execute SQL query
-			          stmt = conn.createStatement();
-			          String sql;
-			          sql = "INSERT INTO totalsevice.users VALUES " + name + surname + email;
-			          ResultSet rs = stmt.executeQuery(sql);
-	
-			          // Clean-up environment
-			          rs.close();
-			          stmt.close();
-			          conn.close();
-			       }
-			  	catch(SQLException se){
-			          //Handle errors for JDBC
-			          se.printStackTrace();
-			       }
-			  	catch(Exception e){
-			          //Handle errors for Class.forName
-			          e.printStackTrace();
-			       }
-			  	finally{
-				          //finally block used to close resources
-				          try{
-				             if(stmt!=null)
-				                stmt.close();
-				          }catch(SQLException se2){
-			          }// nothing we can do
-			          try{
-				             if(conn!=null)
-				             conn.close();
-				          }catch(SQLException se){
-				             se.printStackTrace();
-				          }//end finally try
-			       } //end try
-		  }
-		  
-	      response.setContentType("text/html");
+			// Open a connection
+			conn = DriverManager.getConnection(DB_URL, USER, PASS);
 
-	      // Actual logic goes here.
-	      PrintWriter out = response.getWriter();
-	      out.println("<h1>" + name + "</h1>");
-	
-	
+			// Execute SQL query
+			stmt = conn.createStatement();
+			String sql;
+			sql = "INSERT INTO totalsevice.users VALUES " + name + surname
+					+ email;
+			ResultSet rs = stmt.executeQuery(sql);
+
+			// Clean-up environment
+			rs.close();
+			stmt.close();
+			conn.close();
+		} catch (SQLException se) {
+			// Handle errors for JDBC
+			se.printStackTrace();
+		} catch (Exception e) {
+			// Handle errors for Class.forName
+			e.printStackTrace();
+		} finally {
+			// finally block used to close resources
+			try {
+				if (stmt != null)
+					stmt.close();
+			} catch (SQLException se2) {
+			}// nothing we can do
+			try {
+				if (conn != null)
+					conn.close();
+			} catch (SQLException se) {
+				se.printStackTrace();
+			}// end finally try
+		} // end try
 	}
 
 	/**
